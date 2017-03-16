@@ -167,43 +167,37 @@ def create_tree(data_set, labels):
     return my_tree
 
 
-def classify(input_tree, feat_labels, test_vec):
+def classify(input_tree, feat_labels, test_set):
     """
     使用决策树执行分类
     """
-    first_str = list(input_tree.keys())[0]
-    second_dict = input_tree[first_str]
-    feat_index = feat_labels.index(first_str)  # index方法查找当前列表中第一个匹配first_str变量的元素的索引
-    for key in second_dict.keys():
-        if test_vec[feat_index] == key:
-            if type(second_dict[key]).__name__ == 'dict':
-                class_label = classify(second_dict[key], feat_labels, test_vec)
-            else:
-                class_label = second_dict[key]
-    return class_label
+    def classify(input_tree, feat_labels, test_set):
+        first_str = list(input_tree.keys())[0]
+        second_dict = input_tree[first_str]
+        feat_index = feat_labels.index(first_str)  # index方法查找当前列表中第一个匹配first_str变量的元素的索引
+        for key in second_dict.keys():
+            if test_vec[feat_index] == key:
+                if type(second_dict[key]).__name__ == 'dict':
+                    class_label = classify(second_dict[key], feat_labels, test_vec)
+                else:
+                    class_label = second_dict[key]
+        return class_label
 
-
-def classifyAll(inputTree, featLabels, testDataSet):
-    """
-    输入：决策树，分类标签，测试数据集
-    输出：决策结果
-    描述：跑决策树
-    """
-    classLabelAll = []
-    for testVec in testDataSet:
-        classLabelAll.append(classify(inputTree, featLabels, testVec))
-    return classLabelAll
+    class_label_all = []
+    for test_vec in test_set:
+        class_label_all.append(classify(input_tree, feat_labels, test_vec))
+    return class_label_all
 
 
 if __name__ == '__main__':
     data_set, labels = get_data_set()
     labels_tmp = labels[:]
-    # shannon_ent = calc_shannon_ent(data_set)
+
     desicion_tree = create_tree(data_set, labels)
     print("desicion tree:", desicion_tree)
 
     test_set = get_test_set()
-    classify_result = classifyAll(desicion_tree, labels_tmp, test_set)
+    classify_result = classify(desicion_tree, labels_tmp, test_set)
 
     print("classify result:")
     for data, result in zip(test_set, classify_result):
